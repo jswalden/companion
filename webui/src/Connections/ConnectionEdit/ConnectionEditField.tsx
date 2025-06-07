@@ -9,6 +9,7 @@ import {
 } from '~/Components/index.js'
 import { BonjourDeviceInputField } from '~/Components/BonjourDeviceInputField.js'
 import { ExtendedConfigField, ExtendedInputField } from '@companion-app/shared/Model/Options.js'
+import { OAuthClientInputField } from '~/Components/OAuthClientInputField'
 import { StaticTextFieldText } from '~/Controls/StaticTextField.js'
 
 interface ConnectionEditFieldProps {
@@ -137,6 +138,16 @@ export function ConnectionEditField({
 					setValue={setValue}
 					connectionId={connectionId}
 					queryId={definition.id}
+				/>
+			)
+		case 'oauth':
+			return (
+				<OAuthClientInputField
+					oauthResource={definition}
+					label={label}
+					value={value}
+					setValue={setValue}
+					setValid={setValid2}
 				/>
 			)
 		default:

@@ -9,6 +9,7 @@ import type {
 	CompanionInputFieldNumber,
 	CompanionInputFieldStaticText,
 	CompanionInputFieldTextInput,
+	CompanionInputFieldOAuthClient,
 } from '@companion-module/base'
 
 // TODO: move to '@companion-module/base'
@@ -103,7 +104,9 @@ export type ExtendedInputField =
 	| EncodeIsVisible2<CompanionInputFieldCheckbox>
 	| EncodeIsVisible2<CompanionInputFieldCustomVariable>
 
-export type ExtendedConfigField = EncodeIsVisible2<CompanionInputFieldBonjourDevice>
+export type ExtendedConfigField =
+	| EncodeIsVisible2<CompanionInputFieldBonjourDevice>
+	| EncodeIsVisible2<CompanionInputFieldOAuthClient>
 
 export type EncodeIsVisible2<T extends Pick<CompanionInputFieldBase, 'id' | 'isVisible'>> = Omit<
 	T,

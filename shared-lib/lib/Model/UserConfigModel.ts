@@ -21,6 +21,9 @@ export interface UserConfigModel {
 	pin: string
 	pin_timeout: number
 
+	oauth_callback_listen_host: string
+	oauth_callback_listen_port: number
+
 	http_api_enabled: boolean
 	http_legacy_api_enabled: boolean
 

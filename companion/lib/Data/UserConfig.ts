@@ -59,6 +59,9 @@ export class DataUserConfig extends EventEmitter<DataUserConfigEvents> {
 		pin: '',
 		pin_timeout: 0,
 
+		oauth_callback_listen_host: '127.0.0.1',
+		oauth_callback_listen_port: 8889,
+
 		http_api_enabled: true,
 		http_legacy_api_enabled: false,
 

@@ -4,6 +4,7 @@ import { ServiceElgatoPlugin } from './ElgatoPlugin.js'
 import { ServiceEmberPlus } from './EmberPlus.js'
 import { ServiceHttpApi } from './HttpApi.js'
 import { ServiceHttps } from './Https.js'
+import { ServiceOAuthCallback } from './OAuthCallback.js'
 import { ServiceOscListener } from './OscListener.js'
 import { ServiceOscSender } from './OscSender.js'
 import { ServiceRosstalk } from './Rosstalk.js'
@@ -45,6 +46,7 @@ export class ServiceController {
 	readonly https: ServiceHttps
 	readonly oscSender: ServiceOscSender
 	readonly oscListener: ServiceOscListener
+	readonly oauthCallback: ServiceOAuthCallback
 	readonly tcp: ServiceTcp
 	readonly udp: ServiceUdp
 	readonly emberplus: ServiceEmberPlus
@@ -72,6 +74,7 @@ export class ServiceController {
 		this.https = new ServiceHttps(userconfig, express, io)
 		this.oscSender = oscSender
 		this.oscListener = new ServiceOscListener(serviceApi, userconfig)
+		this.oauthCallback = new ServiceOAuthCallback(userconfig)
 		this.tcp = new ServiceTcp(serviceApi, userconfig)
 		this.udp = new ServiceUdp(serviceApi, userconfig)
 		this.emberplus = new ServiceEmberPlus(serviceApi, userconfig, pageController)
@@ -108,6 +111,7 @@ export class ServiceController {
 		this.https.updateUserConfig(key, value)
 		this.oscListener.updateUserConfig(key, value)
 		this.oscSender.updateUserConfig(key, value)
+		this.oauthCallback.updateUserConfig(key, value)
 		this.rosstalk.updateUserConfig(key, value)
 		this.satelliteTcp.updateUserConfig(key, value)
 		this.satelliteWebsocket.updateUserConfig(key, value)

@@ -5,6 +5,7 @@ import { SatelliteConfig } from './Sections/SatelliteConfig.js'
 import { TcpConfig } from './Sections/TcpConfig.js'
 import { UdpConfig } from './Sections/UdpConfig.js'
 import { OscConfig } from './Sections/OscConfig.js'
+import { OAuthConfig } from './Sections/OAuthConfig.js'
 import { RosstalkConfig } from './Sections/RosstalkConfig.js'
 import { ArtnetConfig } from './Sections/ArtnetConfig.js'
 import { VideohubServerConfig } from './Sections/VideohubServerConfig.js'
@@ -52,6 +53,7 @@ const UserConfigTable = observer(function UserConfigTable() {
 	return (
 		<table className="table table-responsive-sm table-settings">
 			<tbody>
+				<OAuthConfig {...userConfigProps} />
 				<SatelliteConfig {...userConfigProps} />
 				<TcpConfig {...userConfigProps} />
 				<UdpConfig {...userConfigProps} />

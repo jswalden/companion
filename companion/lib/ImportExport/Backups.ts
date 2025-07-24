@@ -434,7 +434,7 @@ export class BackupController {
 		format: ExportFormat
 	): Promise<PreviousBackupInfo> {
 		const data = this.#exportController.generateCustomExport(null)
-		const exportData = await stringifyExport(logger, data, `${filename}.companionconfig`, format)
+		const exportData = await stringifyExport(data, `${filename}.companionconfig`, format)
 		if (!exportData) throw new Error('Failed to stringify export data')
 
 		const filePath = path.join(backupDir, exportData.utf8Filename)
@@ -447,7 +447,7 @@ export class BackupController {
 
 		return {
 			filePath,
-			fileSize: exportData.data.length,
+			fileSize: (await fs.stat(filePath)).size,
 			createdAt: Date.now(),
 		}
 	}

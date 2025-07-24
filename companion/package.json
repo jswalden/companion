@@ -51,6 +51,7 @@
     "@companion-module/base": "^1.13.0-1",
     "@elgato-stream-deck/node": "^7.3.2",
     "@elgato-stream-deck/tcp": "^7.3.2",
+    "@jswalden/streaming-json": "^1.0.0",
     "@julusian/bonjour-service": "^1.4.2",
     "@julusian/image-rs": "^1.1.1",
     "@julusian/jpeg-turbo": "^2.2.0",

@@ -2,45 +2,38 @@ import zlib from 'node:zlib'
 import yaml from 'yaml'
 import type { ExportFormat } from '@companion-app/shared/Model/ExportFormat.js'
 import type { SomeExportv6 } from '@companion-app/shared/Model/ExportModel.js'
-import type { Logger } from 'winston'
-import { promisify } from 'node:util'
-
-const gzipAsync = promisify(zlib.gzip)
+import { Readable } from 'node:stream'
+import { stringify } from '@jswalden/streaming-json'
 
 export interface StringifiedExportData {
-	data: string | Buffer
+	data: Readable
 	contentType: string
 	asciiFilename: string
 	utf8Filename: string
 }
 
 export async function stringifyExport(
-	logger: Logger,
 	data: SomeExportv6,
 	filename: string,
 	format: ExportFormat | undefined
 ): Promise<StringifiedExportData | null> {
 	if (!format || format === 'json-gz') {
-		try {
-			const dataGz = await gzipAsync(JSON.stringify(data))
-			return {
-				data: dataGz,
-				contentType: 'application/json',
-				...formatAttachmentFilename(filename),
-			}
-		} catch (err) {
-			logger.warn(`Failed to gzip data, retrying uncompressed: ${err}`)
-			return stringifyExport(logger, data, filename, 'json')
+		return {
+			data: Readable.from(stringify(data)).pipe(zlib.createGzip()),
+			contentType: 'application/json',
+			...formatAttachmentFilename(filename),
 		}
 	} else if (format === 'json') {
 		return {
-			data: JSON.stringify(data, undefined, '\t'),
+			data: Readable.from(stringify(data, undefined, '\t')),
 			contentType: 'application/json',
 			...formatAttachmentFilename(filename),
 		}
 	} else if (format === 'yaml') {
+		const yamlExport = yaml.stringify(data, splitLongPng64Values)
+		const halves = [yamlExport.slice(0, yamlExport.length >>> 1), yamlExport.slice(yamlExport.length >>> 1)]
 		return {
-			data: yaml.stringify(data, splitLongPng64Values),
+			data: Readable.from(halves),
 			contentType: 'application/yaml',
 			...formatAttachmentFilename(filename),
 		}

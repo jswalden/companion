@@ -46,6 +46,7 @@ import type { TriggerCollection } from '@companion-app/shared/Model/TriggerModel
 import type { CollectionBase } from '@companion-app/shared/Model/Collections.js'
 import { SurfaceGroupConfig } from '@companion-app/shared/Model/Surfaces.js'
 import { formatAttachmentFilename, StringifiedExportData, stringifyExport } from './Util.js'
+import { pipeline, Readable } from 'node:stream'
 
 export class ExportController {
 	readonly #logger = LogController.createLogger('ImportExport/Controller')
@@ -82,7 +83,7 @@ export class ExportController {
 		apiRouter.get('/export/page/:page', this.#exportPageSingleHandler)
 		apiRouter.get('/export/custom', this.#exportCustomHandler)
 		apiRouter.get('/export/full', this.#exportFullHandler)
-		apiRouter.get('/export/log', this.#exportLogHandler)
+		apiRouter.get('/export/log', this.#exportLogHandler.bind(this))
 		apiRouter.get('/export/support', this.#exportSupportBundleHandler)
 	}
 
@@ -180,7 +181,7 @@ export class ExportController {
 		downloadBlob(this.#logger, res, next, exp, filename, String(req.query.format as any))
 	}
 
-	#exportLogHandler: RequestHandler = (_req, res, _next) => {
+	#exportLogHandler([_req, res, _next]: Parameters<RequestHandler>) {
 		const logs = LogController.getAllLines()
 
 		const filename = this.#generateFilename(
@@ -194,11 +195,17 @@ export class ExportController {
 			...logs.map((line) => [new Date(line.time).toISOString(), line.source, line.level, line.message]),
 		])
 
-		sendExportData(res, {
-			data: csvOut,
-			contentType: 'text/csv',
-			...formatAttachmentFilename(filename),
-		})
+		const [firstHalf, secondHalf] = [csvOut.slice(0, csvOut.length >>> 1), csvOut.slice(csvOut.length >>> 1)]
+
+		sendExportData(
+			res,
+			{
+				data: Readable.from([firstHalf, secondHalf]),
+				contentType: 'text/csv',
+				...formatAttachmentFilename(filename),
+			},
+			this.#logger
+		)
 	}
 
 	#exportSupportBundleHandler: RequestHandler = async (_req, res, _next) => {
@@ -546,13 +553,21 @@ function parseDownloadFormat(raw: ParsedQs[0]): ExportFormat | undefined {
 	return undefined
 }
 
-function sendExportData(res: express.Response, data: StringifiedExportData) {
+function sendExportData(
+	res: express.Response,
+	{ contentType, asciiFilename, utf8Filename, data }: StringifiedExportData,
+	logger: Logger
+) {
 	res.status(200)
 	res.set({
-		'Content-Type': data.contentType,
-		'Content-Disposition': `attachment; filename=${data.asciiFilename}; filename*=UTF-8''${data.utf8Filename}`,
+		'Content-Type': contentType,
+		'Content-Disposition': `attachment; filename=${asciiFilename}; filename*=UTF-8''${utf8Filename}`,
 	})
-	res.end(data.data)
+	pipeline(data, res, (err) => {
+		if (err) {
+			logger.warn(`Error while exporting settings, download is likely malformed: ${err.code}`)
+		}
+	})
 }
 
 function downloadBlob(
@@ -563,10 +578,10 @@ function downloadBlob(
 	filename: string,
 	formatStr: string
 ): void {
-	stringifyExport(logger, data, filename, parseDownloadFormat(formatStr))
+	stringifyExport(data, filename, parseDownloadFormat(formatStr))
 		.then((data) => {
 			if (data) {
-				sendExportData(res, data)
+				sendExportData(res, data, logger)
 			} else {
 				next(new Error(`Unknown format: ${formatStr}`))
 			}

@@ -1900,29 +1900,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@companion-module/base@npm:2.1.0-0-nightly-main-20260501-215220-309fb87":
-  version: 2.1.0-0-nightly-main-20260501-215220-309fb87
-  resolution: "@companion-module/base@npm:2.1.0-0-nightly-main-20260501-215220-309fb87"
+"@companion-module/base@portal:/home/jwalden/Christianity/Sound/github/module-base/packages/base::locator=%40companion-app%2Fworkspace%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@companion-module/base@portal:/home/jwalden/Christianity/Sound/github/module-base/packages/base::locator=%40companion-app%2Fworkspace%40workspace%3A."
   dependencies:
     colord: "npm:^2.9.3"
     tslib: "npm:^2.8.1"
-  checksum: 10c0/77f736adc15e4e3f35364b89a3734dd45ac3f2955b0f65d36c9ae5542a8a9f09d8e5a1240cdbc9b4a4bb261bf4b10aa86e9c6e5cf3520a0625c2caab53f897e5
   languageName: node
-  linkType: hard
+  linkType: soft
 
-"@companion-module/host@npm:1.0.3-nightly-main-20260501-214239-60000e7":
-  version: 1.0.3-nightly-main-20260501-214239-60000e7
-  resolution: "@companion-module/host@npm:1.0.3-nightly-main-20260501-214239-60000e7"
+"@companion-module/host@portal:/home/jwalden/Christianity/Sound/github/module-base/packages/host::locator=%40companion-app%2Fworkspace%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@companion-module/host@portal:/home/jwalden/Christianity/Sound/github/module-base/packages/host::locator=%40companion-app%2Fworkspace%40workspace%3A."
   dependencies:
-    "@companion-module/base": "npm:~2.1.0-0"
+    "@companion-module/base": "workspace:~"
     debounce-fn: "npm:^6.0.0"
     p-queue: "npm:^9.2.0"
     semver: "npm:^7.7.4"
     tslib: "npm:^2.8.1"
     zod: "npm:^4.3.6"
-  checksum: 10c0/37a19995ecca811f07923dece7fb8d9890ac3e802004ffdf28b76e3aeed5209ac8fbaaed85acfcacf9da5a7a202169aed0297df6158e6e767f97b8e9587c79ad
   languageName: node
-  linkType: hard
+  linkType: soft
 
 "@companion-surface/base@npm:~1.2.1":
   version: 1.2.1

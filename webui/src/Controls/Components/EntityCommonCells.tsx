@@ -12,6 +12,7 @@ import {
 	EntityModelType,
 	FeedbackEntitySubType,
 	type SomeEntityModel,
+	type StoreActionResultTarget,
 } from '@companion-app/shared/Model/EntityModel.js'
 import type { CompanionInputFieldCheckboxExtended, ExpressionOrValue } from '@companion-app/shared/Model/Options.js'
 import { stringifyVariableValue } from '@companion-app/shared/Model/Variables.js'
@@ -32,6 +33,7 @@ import { OptionsInputField } from '../OptionsInputField.js'
 import { EntityChangeConnection } from './EntityChangeConnection.js'
 import { useEntityEditorContext } from './EntityEditorContext.js'
 import { LayeredStylesOverrides } from './LayeredStylesOverrides.js'
+import { StoreActionResult } from './StoreActionResult.js'
 
 interface EntityCommonCellsProps {
 	entity: SomeEntityModel
@@ -66,6 +68,13 @@ export const EntityCommonCells = observer(function EntityCommonCells({
 	const setInverted = useCallback(
 		(_k: string, inverted: ExpressionOrValue<JsonValue | undefined>) => {
 			service.setInverted(inverted.isExpression ? inverted : { isExpression: false, value: !!inverted.value })
+		},
+		[service]
+	)
+
+	const setStoreActionResultTarget = useCallback(
+		(target: StoreActionResultTarget) => {
+			service.setStoreActionResultTarget(target)
 		},
 		[service]
 	)
@@ -173,6 +182,19 @@ export const EntityCommonCells = observer(function EntityCommonCells({
 							/>
 						</MyErrorBoundary>
 					))}
+
+					{entityDefinition?.entityType === EntityModelType.Action && !!entityDefinition.hasResult && (
+						<MyErrorBoundary>
+							<StoreActionResult
+								isLocatedInGrid={!!location}
+								controlId={controlId}
+								value={entity.type === EntityModelType.Action ? entity.storeResultTarget : undefined}
+								setValue={setStoreActionResultTarget}
+								readonly={readonly}
+								localVariablesStore={localVariablesStore}
+							/>
+						</MyErrorBoundary>
+					)}
 
 					{!!entity &&
 						entity.type === EntityModelType.Feedback &&

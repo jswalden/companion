@@ -3,6 +3,7 @@ import {
 	EntityModelType,
 	schemaFeedbackEntityStyleOverride,
 	zodEntityLocation,
+	zodStoreActionResultTarget,
 	type EntityOwner,
 } from '@companion-app/shared/Model/EntityModel.js'
 import {
@@ -109,6 +110,24 @@ export function createEntitiesTrpcRouter(
 				if (!control.supportsEntities) throw new Error(`Control "${controlId}" does not support entities`)
 
 				return control.entities.entityEnabled(entityLocation, entityId, enabled)
+			}),
+
+		setStoreActionResultTarget: publicProcedure
+			.input(
+				z.object({
+					controlId: z.string(),
+					entityLocation: zodEntityLocation,
+					entityId: z.string(),
+					target: zodStoreActionResultTarget,
+				})
+			)
+			.mutation(async ({ input: { controlId, entityLocation, entityId, target } }) => {
+				const control = controlsMap.get(controlId)
+				if (!control) return false
+
+				if (!control.supportsEntities) throw new Error(`Control "${controlId}" does not support entities`)
+
+				return control.entities.entitySetStoreActionResultTarget(entityLocation, entityId, target)
 			}),
 
 		setHeadline: publicProcedure

@@ -1,7 +1,12 @@
 import z from 'zod'
 import type { CompanionFeedbackButtonStyleResult, JsonValue } from '@companion-module/host'
 import type { ActionSetId } from './ActionModel.js'
-import { ExpressionOrJsonValueSchema, type ExpressionableOptionsObject, type ExpressionOrValue } from './Options.js'
+import {
+	createExpressionOrValueSchema,
+	ExpressionOrJsonValueSchema,
+	type ExpressionableOptionsObject,
+	type ExpressionOrValue,
+} from './Options.js'
 import type { VariableValue } from './Variables.js'
 
 export type SomeEntityModel = ActionEntityModel | FeedbackEntityModel
@@ -42,8 +47,44 @@ export function isInternalUserValueFeedback(entity: EntityModelBase): boolean {
 	)
 }
 
+export type StoreResultToLocalVariable = {
+	target: 'local-variable'
+	location: ExpressionOrValue<string>
+	variableName: ExpressionOrValue<string>
+}
+
+export type StoreResultToCustomVariable = {
+	target: 'custom-variable'
+	variableName: ExpressionOrValue<string>
+	createIfNotExists: boolean
+}
+
+export type StoreActionResultTarget = StoreResultToLocalVariable | StoreResultToCustomVariable | undefined
+
+export const zodStoreActionResultTarget: z.ZodSchema<StoreActionResultTarget> = z.union([
+	z.undefined(),
+	z.discriminatedUnion('target', [
+		z.object({
+			target: z.literal('local-variable'),
+			location: createExpressionOrValueSchema(z.string()),
+			variableName: createExpressionOrValueSchema(z.string()),
+		}),
+		z.object({
+			target: z.literal('custom-variable'),
+			variableName: createExpressionOrValueSchema(z.string()),
+			createIfNotExists: z.boolean(),
+		}),
+	]),
+])
+
 export interface ActionEntityModel extends EntityModelBase {
 	readonly type: EntityModelType.Action
+
+	/**
+	 * If this action returns a result, the target that result should be written
+	 * to.  (Absent/undefined means discard the result.)
+	 */
+	storeResultTarget?: StoreActionResultTarget
 }
 
 export interface FeedbackEntityModel extends EntityModelBase {

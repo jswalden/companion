@@ -435,6 +435,17 @@ export class ControlEntityList {
 	}
 
 	/**
+	 * Update the storeActionResultTarget values on the control with new
+	 * calculated storeActionResultTarget values
+	 * @param newValues The new storeActionResultTarget values
+	 */
+	updateStoreActionResultTargetValues(
+		newValues: ReadonlyMap<string, NewSpecialExpressionValue<'storeActionResultTarget'>>
+	): ControlEntityInstance[] {
+		return this.#entities.flatMap((entity) => entity.updateStoreActionResultTargetValues(newValues))
+	}
+
+	/**
 	 * Get all the connection ids that are enabled
 	 */
 	getAllEnabledConnectionIds(connectionIds: Set<string>): void {

@@ -97,4 +97,24 @@ export class EntityListPoolExpressionVariable extends ControlEntityListPoolBase 
 
 		this.tryTriggerLocalVariablesChanged(...changedVariableEntities)
 	}
+
+	/**
+	 * Update the storeActionResultTarget values on the control with new
+	 * calculated storeActionResultTarget values
+	 * @param newValues The new storeActionResultTarget values
+	 */
+	override updateStoreActionResultTargetValues(
+		newValues: ReadonlyMap<string, NewSpecialExpressionValue<'storeActionResultTarget'>>
+	): void {
+		const changedVariableEntities = this.#localVariables.updateStoreActionResultTargetValues(newValues)
+
+		if (this.#entities.updateStoreActionResultTargetValues(newValues).length > 0) {
+			this.reportChange({
+				redraw: true,
+				noSave: true,
+			})
+		}
+
+		this.tryTriggerLocalVariablesChanged(...changedVariableEntities)
+	}
 }

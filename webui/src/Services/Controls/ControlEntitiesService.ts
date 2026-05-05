@@ -7,6 +7,7 @@ import {
 	type FeedbackEntityStyleOverride,
 	type SomeEntityModel,
 	type SomeSocketEntityLocation,
+	type StoreActionResultTarget,
 } from '@companion-app/shared/Model/EntityModel.js'
 import type { ExpressionOrValue } from '@companion-app/shared/Model/Options.js'
 import type { VariableValue } from '@companion-app/shared/Model/Variables.js'
@@ -44,6 +45,7 @@ export interface IEntityEditorService {
 	setHeadline: ((entityId: string, headline: string) => void) | undefined
 
 	setInverted: (entityId: string, inverted: ExpressionOrValue<boolean>) => void
+	setStoreActionResultTarget: (entityId: string, target: StoreActionResultTarget) => void
 	setVariableName: (entityId: string, name: string) => void
 	setVariableValue: (entityId: string, value: VariableValue) => void
 
@@ -59,6 +61,8 @@ export interface IEntityEditorActionService {
 	performLearn: (() => void) | undefined
 	setEnabled: ((enabled: boolean) => void) | undefined
 	setHeadline: ((headline: string) => void) | undefined
+
+	setStoreActionResultTarget: (target: StoreActionResultTarget) => void
 
 	setInverted: (inverted: ExpressionOrValue<boolean>) => void
 	setVariableName: (name: string) => void
@@ -83,6 +87,9 @@ export function useControlEntitiesEditorService(
 	const setEnabledMutation = useMutationExt(trpc.controls.entities.setEnabled.mutationOptions())
 	const setHeadlineMutation = useMutationExt(trpc.controls.entities.setHeadline.mutationOptions())
 	const setInvertedMutation = useMutationExt(trpc.controls.entities.setInverted.mutationOptions())
+	const setStoreActionResultTargetMutation = useMutationExt(
+		trpc.controls.entities.setStoreActionResultTarget.mutationOptions()
+	)
 	const setVariableNameMutation = useMutationExt(trpc.controls.entities.setVariableName.mutationOptions())
 	const setVariableValueMutation = useMutationExt(trpc.controls.entities.setVariableValue.mutationOptions())
 	const replaceStyleOverrideMutation = useMutationExt(trpc.controls.entities.replaceStyleOverride.mutationOptions())
@@ -239,6 +246,20 @@ export function useControlEntitiesEditorService(
 					})
 			},
 
+			setStoreActionResultTarget: (entityId: string, target: StoreActionResultTarget) => {
+				console.log(`useControlEntitiesEditorService setStoreActionResultTarget, target=${JSON.stringify(target)}`)
+				setStoreActionResultTargetMutation
+					.mutateAsync({
+						controlId,
+						entityLocation: listId,
+						entityId,
+						target,
+					})
+					.catch((e) => {
+						console.error('Failed to set store action result target', e)
+					})
+			},
+
 			setVariableName: (entityId: string, name: string) => {
 				setVariableNameMutation
 					.mutateAsync({
@@ -338,6 +359,9 @@ export function useControlEntityService(
 			setHeadline: serviceFactory.setHeadline
 				? (headline: string) => serviceFactory.setHeadline?.(entityId, headline)
 				: undefined,
+			setStoreActionResultTarget: (target: StoreActionResultTarget) => {
+				serviceFactory.setStoreActionResultTarget(entityId, target)
+			},
 			setInverted: (inverted: ExpressionOrValue<boolean>) => serviceFactory.setInverted(entityId, inverted),
 			setVariableName: (name: string) => serviceFactory.setVariableName(entityId, name),
 			setVariableValue: (value: VariableValue) => serviceFactory.setVariableValue(entityId, value),

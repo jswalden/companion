@@ -7,12 +7,14 @@ import {
 	EntityModelType,
 	FeedbackEntitySubType,
 	isInternalUserValueFeedback as libIsInternalUserValueFeedback,
+	type ActionEntityModel,
 	type EntitySupportedChildGroupDefinition,
 	type FeedbackEntityModel,
 	type FeedbackEntityStyleOverride,
 	type FeedbackValue,
 	type SomeEntityModel,
 	type SomeReplaceableEntityModel,
+	type StoreActionResultTarget,
 } from '@companion-app/shared/Model/EntityModel.js'
 import type { ExpressionableOptionsObject, ExpressionOrValue } from '@companion-app/shared/Model/Options.js'
 import { stringifyError } from '@companion-app/shared/Stringify.js'
@@ -27,6 +29,7 @@ import type {
 	InternalControllerForEntity,
 	NewFeedbackValue,
 	ProcessManagerForEntity,
+	StoreActionResultTargetValue,
 } from './Types.js'
 
 export class ControlEntityInstance {
@@ -56,6 +59,11 @@ export class ControlEntityInstance {
 	 * Note: This only applies to boolean feedbacks
 	 */
 	#cachedIsInverted: boolean = false
+
+	/**
+	 * The target into which this action's result is stored, if it has one.
+	 */
+	#cachedStoreActionResultTarget: StoreActionResultTargetValue
 
 	#children = new Map<string, ControlEntityList>()
 
@@ -105,6 +113,15 @@ export class ControlEntityInstance {
 	}
 
 	/**
+	 * Get the raw storeActionResultTarget value for this feedback
+	 */
+	get rawStoreActionResultTarget(): StoreActionResultTarget {
+		const data = this.#data
+		if (data.type !== EntityModelType.Action) return undefined
+		return (data as ActionEntityModel).storeResultTarget
+	}
+
+	/**
 	 * Get the raw isInverted value for this feedback
 	 */
 	get rawIsInverted(): ExpressionOrValue<boolean> | undefined {
@@ -151,6 +168,11 @@ export class ControlEntityInstance {
 		if (!entity.variableName.match(idCheckRegex)) return null
 
 		return entity.variableName
+	}
+
+	get storeActionResultTarget(): StoreActionResultTargetValue {
+		if (this.type !== EntityModelType.Action) return undefined
+		return this.#cachedStoreActionResultTarget
 	}
 
 	/**
@@ -214,6 +236,7 @@ export class ControlEntityInstance {
 
 		this.#cachedFeedbackValue = this.#getStartupValue()
 		this.#cachedIsInverted = this.#getStartupIsInverted()
+		this.#cachedStoreActionResultTarget = undefined
 	}
 
 	#getOrCreateChildGroupFromDefinition(listDefinition: EntitySupportedChildGroupDefinition): ControlEntityList {
@@ -302,6 +325,9 @@ export class ControlEntityInstance {
 			}
 			if (!this.#data.disabled) {
 				this.#specialExpressionManager.trackEntity(this, 'isInverted')
+			}
+			if (this.#data.type === EntityModelType.Action) {
+				this.#specialExpressionManager.trackEntity(this, 'storeActionResultTarget')
 			}
 		}
 
@@ -412,6 +438,17 @@ export class ControlEntityInstance {
 		}
 
 		// Inform relevant module
+		this.subscribe(false)
+	}
+
+	/** Set the target into which an action's result is stored (if any). */
+	setStoreActionResultTarget(target: StoreActionResultTarget): void {
+		if (this.type !== EntityModelType.Action) return
+
+		const data = this.#data as ActionEntityModel
+
+		this.cleanup()
+		data.storeResultTarget = target
 		this.subscribe(false)
 	}
 
@@ -834,6 +871,58 @@ export class ControlEntityInstance {
 				// If this is a logic operator, and one of its children changed, we need to re-evaluate
 				changed.push(this)
 			}
+		}
+
+		return changed
+	}
+
+	/**
+	 * Update the storeActionResultTarget values on the control with new
+	 * calculated storeActionResultTarget values
+	 * @param newValues The updated storeActionResultTarget values
+	 */
+	updateStoreActionResultTargetValues(
+		newValues: ReadonlyMap<string, NewSpecialExpressionValue<'storeActionResultTarget'>>
+	): ControlEntityInstance[] {
+		const changed: ControlEntityInstance[] = []
+
+		const newValue = newValues.get(this.#data.id)
+
+		if (this.type === EntityModelType.Action && newValue) {
+			const cachedStoreActionResultTarget = this.#cachedStoreActionResultTarget
+			let thisChanged: boolean
+			switch (newValue.value?.target) {
+				case undefined:
+					thisChanged = cachedStoreActionResultTarget !== undefined
+					break
+				case 'custom-variable': {
+					thisChanged =
+						cachedStoreActionResultTarget?.target !== 'custom-variable' ||
+						cachedStoreActionResultTarget.variableName !== newValue.value.variableName ||
+						cachedStoreActionResultTarget.createIfNotExists !== newValue.value.createIfNotExists
+					break
+				}
+				case 'local-variable': {
+					thisChanged =
+						cachedStoreActionResultTarget?.target !== 'local-variable' ||
+						cachedStoreActionResultTarget.location !== newValue.value.location ||
+						cachedStoreActionResultTarget.variableName !== newValue.value.variableName
+					break
+				}
+				default:
+					thisChanged = true
+					break
+			}
+
+			if (thisChanged) {
+				this.#cachedStoreActionResultTarget = newValue.value
+				changed.push(this)
+			}
+		}
+
+		for (const childGroup of this.#children.values()) {
+			const childrenChanged = childGroup.updateStoreActionResultTargetValues(newValues)
+			changed.push(...childrenChanged)
 		}
 
 		return changed

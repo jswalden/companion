@@ -9,6 +9,7 @@ import {
 	type SomeEntityModel,
 	type SomeReplaceableEntityModel,
 	type SomeSocketEntityLocation,
+	type StoreActionResultTarget,
 } from '@companion-app/shared/Model/EntityModel.js'
 import type { ExpressionOrValue } from '@companion-app/shared/Model/Options.js'
 import { stringifyVariableValue, type VariableValues } from '@companion-app/shared/Model/Variables.js'
@@ -84,6 +85,7 @@ export abstract class ControlEntityListPoolBase {
 			this.createVariablesAndExpressionParser.bind(this),
 			{
 				isInverted: this.updateIsInvertedValues.bind(this),
+				storeActionResultTarget: this.updateStoreActionResultTargetValues.bind(this),
 			}
 		)
 	}
@@ -648,6 +650,22 @@ export abstract class ControlEntityListPoolBase {
 		return true
 	}
 
+	/** Set the target of that this action's result will be written to. */
+	entitySetStoreActionResultTarget(
+		listId: SomeSocketEntityLocation,
+		id: string,
+		target: StoreActionResultTarget
+	): boolean {
+		const entity = this.getEntityList(listId)?.findById(id)
+		if (!entity) return false
+
+		entity.setStoreActionResultTarget(target)
+
+		this.reportChange({ redraw: true })
+
+		return true
+	}
+
 	/**
 	 * Set the local variable name for an entity
 	 * @param listId The list the entity is in
@@ -804,6 +822,15 @@ export abstract class ControlEntityListPoolBase {
 	 */
 	protected abstract updateIsInvertedValues(
 		newValues: ReadonlyMap<string, NewSpecialExpressionValue<'isInverted'>>
+	): void
+
+	/**
+	 * Update the storeActionResultTarget values on the control with new
+	 * calculated storeActionResultTarget values
+	 * @param newValues The new storeActionResultTarget values
+	 */
+	protected abstract updateStoreActionResultTargetValues(
+		newValues: ReadonlyMap<string, NewSpecialExpressionValue<'storeActionResultTarget'>>
 	): void
 
 	/**

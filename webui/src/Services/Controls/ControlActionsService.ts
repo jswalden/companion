@@ -6,6 +6,7 @@ import type {
 	FeedbackEntityStyleOverride,
 	SomeEntityModel,
 	SomeSocketEntityLocation,
+	StoreActionResultTarget,
 } from '@companion-app/shared/Model/EntityModel.js'
 import type { ExpressionOrValue } from '@companion-app/shared/Model/Options.js'
 import { trpc, useMutationExt } from '~/Resources/TRPC.js'
@@ -72,6 +73,10 @@ export function useActionRecorderActionService(sessionId: string): IEntityEditor
 			performLearn: undefined,
 			setEnabled: undefined,
 			setHeadline: undefined,
+
+			setStoreActionResultTarget: (_entityId: string, _target: StoreActionResultTarget) => {
+				// Not supported
+			},
 
 			setInverted: (_entityId: string, _inverted: ExpressionOrValue<boolean>) => {
 				// Not supported

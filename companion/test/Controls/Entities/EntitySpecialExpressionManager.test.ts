@@ -5,7 +5,7 @@ import type { ControlEntityInstance } from '../../../lib/Controls/Entities/Entit
 import {
 	CreateVariablesAndExpressionParser,
 	EntityPoolSpecialExpressionManager,
-} from '../../../lib/Controls/Entities/EntityIsInvertedManager.js'
+} from '../../../lib/Controls/Entities/EntitySpecialExpressionManager.js'
 import {
 	UpdateSpecialExpressionValuesFn,
 	NewSpecialExpressionValue,

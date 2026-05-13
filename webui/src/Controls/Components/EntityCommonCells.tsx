@@ -74,6 +74,7 @@ export const EntityCommonCells = observer(function EntityCommonCells({
 
 	const setStoreActionResultTarget = useCallback(
 		(target: StoreActionResultTarget) => {
+			console.log('###################### setStoreActionResultTarget in webui')
 			service.setStoreActionResultTarget(target)
 		},
 		[service]

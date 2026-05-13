@@ -247,6 +247,7 @@ export function useControlEntitiesEditorService(
 			},
 
 			setStoreActionResultTarget: (entityId: string, target: StoreActionResultTarget) => {
+				console.log('########################################### HERE')
 				console.log(`useControlEntitiesEditorService setStoreActionResultTarget, target=${JSON.stringify(target)}`)
 				setStoreActionResultTargetMutation
 					.mutateAsync({
@@ -360,6 +361,7 @@ export function useControlEntityService(
 				? (headline: string) => serviceFactory.setHeadline?.(entityId, headline)
 				: undefined,
 			setStoreActionResultTarget: (target: StoreActionResultTarget) => {
+				console.log('############ sSART in useControlEntityService')
 				serviceFactory.setStoreActionResultTarget(entityId, target)
 			},
 			setInverted: (inverted: ExpressionOrValue<boolean>) => serviceFactory.setInverted(entityId, inverted),
